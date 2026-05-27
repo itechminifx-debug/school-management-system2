@@ -1,82 +1,82 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Helper: Read JSON file
+// Data directory (Render has temporary writable storage)
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
 function readData(fileName) {
     try {
-        const data = fs.readFileSync('./data/' + fileName + '.json', 'utf8');
+        const filePath = path.join(dataDir, fileName + '.json');
+        if (!fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, JSON.stringify([]));
+            return [];
+        }
+        const data = fs.readFileSync(filePath, 'utf8');
         return JSON.parse(data);
     } catch(e) {
         return [];
     }
 }
 
-// Helper: Write JSON file
 function writeData(fileName, data) {
-    fs.writeFileSync('./data/' + fileName + '.json', JSON.stringify(data, null, 2));
+    const filePath = path.join(dataDir, fileName + '.json');
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
-// ==================== STUDENTS API ====================
-app.get('/api/students', (req, res) => {
-    res.json(readData('students'));
-});
+// Initialize data
+const users = readData('users');
+if (users.length === 0) {
+    writeData('users', [{ id: '1', username: 'admin', password: 'admin123', role: 'admin', name: 'System Admin' }]);
+}
 
+// ==================== API ENDPOINTS ====================
+app.get('/api/students', (req, res) => { res.json(readData('students')); });
 app.post('/api/students', (req, res) => {
     const students = readData('students');
-    students.push(req.body);
+    const newStudent = { id: Date.now().toString(), ...req.body };
+    students.push(newStudent);
     writeData('students', students);
-    res.json({ success: true });
+    res.json({ success: true, student: newStudent });
 });
 
-app.put('/api/students/:id', (req, res) => {
-    const students = readData('students');
-    const index = students.findIndex(s => s.id === req.params.id);
-    if (index !== -1) { students[index] = req.body; writeData('students', students); }
-    res.json({ success: true });
-});
-
-app.delete('/api/students/:id', (req, res) => {
-    let students = readData('students');
-    students = students.filter(s => s.id !== req.params.id);
-    writeData('students', students);
-    res.json({ success: true });
-});
-
-// ==================== STAFF API ====================
 app.get('/api/staff', (req, res) => { res.json(readData('staff')); });
 app.post('/api/staff', (req, res) => {
-    const staff = readData('staff'); staff.push(req.body);
-    writeData('staff', staff); res.json({ success: true });
+    const staff = readData('staff');
+    const newStaff = { id: Date.now().toString(), ...req.body };
+    staff.push(newStaff);
+    writeData('staff', staff);
+    res.json({ success: true, staff: newStaff });
 });
 
-// ==================== FEES API ====================
 app.get('/api/fees', (req, res) => { res.json(readData('fees')); });
 app.post('/api/fees', (req, res) => {
-    const fees = readData('fees'); fees.push(req.body);
-    writeData('fees', fees); res.json({ success: true });
+    const fees = readData('fees');
+    const newFee = { id: Date.now().toString(), ...req.body };
+    fees.push(newFee);
+    writeData('fees', fees);
+    res.json({ success: true, fee: newFee });
 });
 
-// ==================== EXAMS API ====================
 app.get('/api/exams', (req, res) => { res.json(readData('exams')); });
 app.post('/api/exams', (req, res) => {
-    const exams = readData('exams'); exams.push(req.body);
-    writeData('exams', exams); res.json({ success: true });
+    const exams = readData('exams');
+    const newExam = { id: Date.now().toString(), ...req.body };
+    exams.push(newExam);
+    writeData('exams', exams);
+    res.json({ success: true, exam: newExam });
 });
 
-// ==================== USERS API ====================
-app.get('/api/users', (req, res) => { res.json(readData('users')); });
-app.post('/api/users', (req, res) => {
-    const users = readData('users'); users.push(req.body);
-    writeData('users', users); res.json({ success: true });
-});
-
-// ==================== LOGIN API ====================
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const users = readData('users');
@@ -84,23 +84,25 @@ app.post('/api/login', (req, res) => {
     if (user) {
         res.json({ success: true, role: user.role, name: user.name });
     } else {
-        res.json({ success: false, message: 'Invalid credentials' });
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 });
 
-// ==================== BACKUP API ====================
-app.get('/api/backup', (req, res) => {
-    const backup = {};
-    const files = ['students','staff','fees','exams','subjects','sba','payroll','expenses','hostel','transport','library','users','settings'];
-    files.forEach(f => { backup[f] = readData(f); });
-    res.json(backup);
+app.get('/api/settings', (req, res) => {
+    const settings = readData('settings');
+    res.json(settings[0] || { schoolName: 'School Management System' });
 });
 
-// Start server
+app.post('/api/settings', (req, res) => {
+    writeData('settings', [req.body]);
+    res.json({ success: true });
+});
+
+// Serve frontend
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
+app.get('/:page.html', (req, res) => { res.sendFile(path.join(__dirname, 'public', `${req.params.page}.html`)); });
+
 app.listen(PORT, '0.0.0.0', () => {
-    console.log('============================================');
-    console.log('  🏫 SCHOOL MANAGEMENT SYSTEM');
-    console.log('  Server running on port ' + PORT);
-    console.log('  Access from other PCs: http://YOUR-IP:' + PORT);
-    console.log('============================================');
+    console.log(`✅ School Management System running on port ${PORT}`);
+    console.log(`🔐 Login: admin / admin123`);
 });
