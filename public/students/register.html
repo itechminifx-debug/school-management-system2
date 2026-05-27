@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; --danger: #dc2626; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+        .card h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #f8fafc; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-group.full { grid-column: span 3; }
+        .form-group.half { grid-column: span 2; }
+        
+        .section-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 16px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--primary); grid-column: span 3; }
+        
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { padding: 12px 22px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+        .btn-success { background: var(--success); } .btn-primary { background: var(--primary); } .btn-danger { background: var(--danger); }
+        .btn:hover { transform: translateY(-2px); }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        
+        @media (max-width: 800px) { .form-grid { grid-template-columns: 1fr 1fr; } .form-group.full, .form-group.half, .section-title { grid-column: span 2; } }
+        @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } .form-group.full, .form-group.half, .section-title { grid-column: span 1; } }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="brand">🏫 School<span>Manager</span> — Register Student</div><a href="../dashboard.html">← Dashboard</a></div>
+    <div class="main">
+        <div class="card">
+            <h3>📝 Student Registration Form</h3>
+            <div class="form-grid">
+                <!-- PERSONAL INFORMATION -->
+                <div class="section-title">👤 Personal Information</div>
+                
+                <div class="form-group"><label>First Name *</label><input type="text" id="firstName" placeholder="First name"></div>
+                <div class="form-group"><label>Middle Name</label><input type="text" id="middleName" placeholder="Middle name"></div>
+                <div class="form-group"><label>Last Name *</label><input type="text" id="lastName" placeholder="Last name"></div>
+                
+                <div class="form-group"><label>Gender *</label><select id="gender"><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                <div class="form-group"><label>Date of Birth</label><input type="date" id="dob"></div>
+                <div class="form-group"><label>Place of Birth</label><input type="text" id="birthPlace" placeholder="Town/City"></div>
+                
+                <div class="form-group"><label>Nationality</label><input type="text" id="nationality" value="Ghanaian"></div>
+                <div class="form-group"><label>Religion</label><select id="religion"><option value="">Select</option><option value="Christian">Christian</option><option value="Muslim">Muslim</option><option value="Traditional">Traditional</option><option value="Other">Other</option></select></div>
+                <div class="form-group"><label>Language Spoken</label><input type="text" id="language" placeholder="e.g., English, Twi"></div>
+                
+                <!-- MEDICAL INFORMATION -->
+                <div class="section-title">🏥 Medical Information</div>
+                
+                <div class="form-group"><label>Blood Group</label><select id="bloodGroup"><option value="">Unknown</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
+                <div class="form-group"><label>Genotype</label><select id="genotype"><option value="">Unknown</option><option value="AA">AA</option><option value="AS">AS</option><option value="SS">SS</option></select></div>
+                <div class="form-group"><label>Allergies / Medical Conditions</label><input type="text" id="allergies" placeholder="e.g., Asthma, None"></div>
+                
+                <!-- ACADEMIC INFORMATION -->
+                <div class="section-title">📚 Academic Information</div>
+                
+                <div class="form-group"><label>Class Admitted To *</label><select id="studentClass"><option value="">Select Class</option><option value="Crèche">Crèche</option><option value="Nursery 1">Nursery 1</option><option value="Nursery 2">Nursery 2</option><option value="KG 1">KG 1</option><option value="KG 2">KG 2</option><option value="Basic 1">Basic 1</option><option value="Basic 2">Basic 2</option><option value="Basic 3">Basic 3</option><option value="Basic 4">Basic 4</option><option value="Basic 5">Basic 5</option><option value="Basic 6">Basic 6</option><option value="JHS 1">JHS 1</option><option value="JHS 2">JHS 2</option><option value="JHS 3">JHS 3</option></select></div>
+                <div class="form-group"><label>Date of Admission *</label><input type="date" id="admissionDate"></div>
+                <div class="form-group"><label>Previous School</label><input type="text" id="previousSchool" placeholder="Previous school attended"></div>
+                
+                <div class="form-group"><label>House</label><select id="house"><option value="">Select House</option><option value="Red House">Red House</option><option value="Blue House">Blue House</option><option value="Green House">Green House</option><option value="Yellow House">Yellow House</option></select></div>
+                <div class="form-group"><label>Academic Year</label><input type="text" id="academicYear" value="2025/2026"></div>
+                <div class="form-group"><label>Term Admitted</label><select id="termAdmitted"><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select></div>
+                
+                <!-- PARENT/GUARDIAN INFORMATION -->
+                <div class="section-title">👨‍👩‍👧 Parent / Guardian Information</div>
+                
+                <div class="form-group"><label>Parent/Guardian Name *</label><input type="text" id="parentName" placeholder="Full name"></div>
+                <div class="form-group"><label>Relationship</label><select id="relationship"><option value="">Select</option><option value="Father">Father</option><option value="Mother">Mother</option><option value="Guardian">Guardian</option><option value="Other">Other</option></select></div>
+                <div class="form-group"><label>Parent Phone *</label><input type="text" id="parentPhone" placeholder="0244-123-456"></div>
+                
+                <div class="form-group"><label>Parent Email</label><input type="email" id="parentEmail" placeholder="parent@email.com"></div>
+                <div class="form-group"><label>Parent Occupation</label><input type="text" id="parentOccupation" placeholder="Occupation"></div>
+                <div class="form-group"><label>Emergency Contact</label><input type="text" id="emergencyContact" placeholder="Name & phone"></div>
+                
+                <!-- ADDRESS -->
+                <div class="section-title">📍 Address Information</div>
+                
+                <div class="form-group"><label>Residential Address</label><input type="text" id="address" placeholder="House number & street"></div>
+                <div class="form-group"><label>City/Town</label><input type="text" id="city" placeholder="City"></div>
+                <div class="form-group"><label>Region</label><select id="region"><option value="">Select</option><option value="Greater Accra">Greater Accra</option><option value="Ashanti">Ashanti</option><option value="Central">Central</option><option value="Eastern">Eastern</option><option value="Western">Western</option><option value="Volta">Volta</option><option value="Northern">Northern</option><option value="Upper East">Upper East</option><option value="Upper West">Upper West</option><option value="Bono">Bono</option><option value="Ahafo">Ahafo</option><option value="Savannah">Savannah</option><option value="North East">North East</option><option value="Western North">Western North</option><option value="Oti">Oti</option></select></div>
+                
+                <!-- ADDITIONAL NOTES -->
+                <div class="section-title">📝 Additional Information</div>
+                <div class="form-group full"><label>Notes / Comments</label><textarea id="notes" placeholder="Any additional notes about the student..."></textarea></div>
+            </div>
+            
+            <div class="btn-row">
+                <button class="btn btn-success" onclick="registerStudent()">💾 Register Student</button>
+                <button class="btn btn-primary" onclick="registerAndNew()">💾 Save & Add Another</button>
+                <a href="../dashboard.html" class="btn btn-danger">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        function getStudents() { var d = localStorage.getItem('sms_students'); return d ? JSON.parse(d) : []; }
+        function saveStudents(data) { localStorage.setItem('sms_students', JSON.stringify(data)); }
+
+        function generateID() {
+            var students = getStudents();
+            return 'STU-' + new Date().getFullYear() + '-' + String(students.length + 1).padStart(4, '0');
+        }
+
+        function getFormData() {
+            return {
+                id: generateID(),
+                firstName: document.getElementById('firstName').value.trim(),
+                middleName: document.getElementById('middleName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                gender: document.getElementById('gender').value,
+                dob: document.getElementById('dob').value,
+                birthPlace: document.getElementById('birthPlace').value.trim(),
+                nationality: document.getElementById('nationality').value.trim(),
+                religion: document.getElementById('religion').value,
+                language: document.getElementById('language').value.trim(),
+                bloodGroup: document.getElementById('bloodGroup').value,
+                genotype: document.getElementById('genotype').value,
+                allergies: document.getElementById('allergies').value.trim(),
+                class: document.getElementById('studentClass').value,
+                admissionDate: document.getElementById('admissionDate').value,
+                previousSchool: document.getElementById('previousSchool').value.trim(),
+                house: document.getElementById('house').value,
+                academicYear: document.getElementById('academicYear').value,
+                termAdmitted: document.getElementById('termAdmitted').value,
+                parentName: document.getElementById('parentName').value.trim(),
+                relationship: document.getElementById('relationship').value,
+                parentPhone: document.getElementById('parentPhone').value.trim(),
+                parentEmail: document.getElementById('parentEmail').value.trim(),
+                parentOccupation: document.getElementById('parentOccupation').value.trim(),
+                emergencyContact: document.getElementById('emergencyContact').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                region: document.getElementById('region').value,
+                notes: document.getElementById('notes').value.trim(),
+                registeredDate: new Date().toLocaleDateString()
+            };
+        }
+
+        function validateForm() {
+            var fn = document.getElementById('firstName').value.trim();
+            var ln = document.getElementById('lastName').value.trim();
+            var cls = document.getElementById('studentClass').value;
+            var adm = document.getElementById('admissionDate').value;
+            var pn = document.getElementById('parentName').value.trim();
+            var pp = document.getElementById('parentPhone').value.trim();
+            var errors = [];
+            if (!fn) errors.push('First Name');
+            if (!ln) errors.push('Last Name');
+            if (!cls) errors.push('Class');
+            if (!adm) errors.push('Date of Admission');
+            if (!pn) errors.push('Parent/Guardian Name');
+            if (!pp) errors.push('Parent Phone');
+            if (errors.length > 0) {
+                showToast('⚠️ Please fill required fields: ' + errors.join(', '));
+                return false;
+            }
+            return true;
+        }
+
+        function registerStudent() {
+            if (!validateForm()) return;
+            var students = getStudents();
+            students.push(getFormData());
+            saveStudents(students);
+            clearForm();
+            showToast('✅ Student registered successfully! Total: ' + students.length);
+        }
+
+        function registerAndNew() {
+            if (!validateForm()) return;
+            var students = getStudents();
+            students.push(getFormData());
+            saveStudents(students);
+            clearForm();
+            showToast('✅ Saved! Total: ' + students.length + ' students. Register another.');
+        }
+
+        function clearForm() {
+            var ids = ['firstName','middleName','lastName','birthPlace','nationality','language','allergies','previousSchool','parentName','parentPhone','parentEmail','parentOccupation','emergencyContact','address','city','notes'];
+            ids.forEach(function(id) { document.getElementById(id).value = ''; });
+            document.getElementById('gender').value = ''; document.getElementById('religion').value = '';
+            document.getElementById('bloodGroup').value = ''; document.getElementById('genotype').value = '';
+            document.getElementById('house').value = ''; document.getElementById('relationship').value = '';
+            document.getElementById('region').value = '';
+        }
+
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg; t.style.display = 'block';
+            setTimeout(function() { t.style.display = 'none'; }, 3000);
+        }
+
+        // Set default admission date to today
+        window.onload = function() {
+            document.getElementById('admissionDate').value = new Date().toISOString().split('T')[0];
+        };
+    </script>
+</body>
+</html>

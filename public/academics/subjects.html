@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjects | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #1e40af; --primary-dark: #1e3a8a; --primary-light: #eff6ff; --success: #059669; --warning: #d97706; --danger: #dc2626; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header .brand { font-size: 18px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .header .brand .icon { width: 34px; height: 34px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; }
+        .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        
+        .main { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px; margin-bottom: 20px; }
+        .card h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+        
+        .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 16px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .form-group input, .form-group select { padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #f8fafc; min-width: 200px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); } .btn-success { background: var(--success); } .btn-danger { background: var(--danger); }
+        .btn-sm { padding: 5px 10px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-del { background: #fee2e2; color: #991b1b; }
+        
+        .class-section { margin-bottom: 24px; }
+        .class-section h4 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 10px; padding: 8px 14px; background: var(--primary-light); border-radius: 8px; display: inline-block; }
+        .subject-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .subject-tag { background: white; border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .subject-tag .remove { cursor: pointer; color: var(--danger); font-weight: 700; font-size: 14px; }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand"><div class="icon">🏫</div>School<span>Manager</span></div>
+        <a href="/dashboard.html">← Dashboard</a>
+    </div>
+
+    <div class="main">
+        <div class="page-header"><h1>📚 Subject Management</h1></div>
+
+        <!-- ADD SUBJECT -->
+        <div class="card">
+            <h3>➕ Add Subject to Class</h3>
+            <div class="form-row">
+                <div class="form-group"><label>Select Class</label><select id="selectClass" onchange="loadClassSubjects()">
+                    <option value="">Choose Class</option>
+                    <optgroup label="Early Years">
+                        <option value="Crèche">Crèche</option><option value="Nursery 1">Nursery 1</option><option value="Nursery 2">Nursery 2</option>
+                        <option value="KG 1">KG 1</option><option value="KG 2">KG 2</option>
+                    </optgroup>
+                    <optgroup label="Lower Primary">
+                        <option value="Basic 1">Basic 1</option><option value="Basic 2">Basic 2</option><option value="Basic 3">Basic 3</option>
+                    </optgroup>
+                    <optgroup label="Upper Primary">
+                        <option value="Basic 4">Basic 4</option><option value="Basic 5">Basic 5</option><option value="Basic 6">Basic 6</option>
+                    </optgroup>
+                    <optgroup label="Junior High">
+                        <option value="JHS 1">JHS 1</option><option value="JHS 2">JHS 2</option><option value="JHS 3">JHS 3</option>
+                    </optgroup>
+                </select></div>
+                <div class="form-group"><label>Subject Name</label><input type="text" id="subjectName" placeholder="e.g., English Language"></div>
+                <div class="form-group"><label>&nbsp;</label><button class="btn btn-success" onclick="addSubject()" style="height:42px;">➕ Add</button></div>
+            </div>
+        </div>
+
+        <!-- SUBJECTS DISPLAY -->
+        <div id="allSubjects"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        var defaultSubjects = {
+            'Crèche': ['Language & Literacy', 'Numeracy', 'Creative Arts', 'Physical Development', 'Social & Emotional'],
+            'Nursery 1': ['Language & Literacy', 'Numeracy', 'Creative Arts', 'Physical Development', 'Environmental Studies'],
+            'Nursery 2': ['Language & Literacy', 'Numeracy', 'Creative Arts', 'Physical Development', 'Environmental Studies', 'Music & Movement'],
+            'KG 1': ['Literacy', 'Numeracy', 'Creative Art', 'Religious & Moral Education', 'Phonics', 'Environmental Studies'],
+            'KG 2': ['Literacy', 'Numeracy', 'Creative Art', 'Religious & Moral Education', 'Phonics', 'Environmental Studies'],
+            'Basic 1': ['English Language', 'Mathematics', 'Science', 'Creative Arts', 'RME', 'History', 'Our World Our People', 'ICT'],
+            'Basic 2': ['English Language', 'Mathematics', 'Science', 'Creative Arts', 'RME', 'History', 'Our World Our People', 'ICT'],
+            'Basic 3': ['English Language', 'Mathematics', 'Science', 'Creative Arts', 'RME', 'History', 'Our World Our People', 'ICT', 'French'],
+            'Basic 4': ['English Language', 'Mathematics', 'Science', 'Creative Arts', 'RME', 'History', 'Computing', 'French', 'Ghanaian Language'],
+            'Basic 5': ['English Language', 'Mathematics', 'Science', 'Creative Arts', 'RME', 'History', 'Computing', 'French', 'Ghanaian Language'],
+            'Basic 6': ['English Language', 'Mathematics', 'Science', 'Creative Arts', 'RME', 'History', 'Computing', 'French', 'Ghanaian Language'],
+            'JHS 1': ['English Language', 'Mathematics', 'Integrated Science', 'Social Studies', 'RME', 'ICT', 'BDT', 'French', 'Ghanaian Language', 'Creative Arts', 'Career Technology'],
+            'JHS 2': ['English Language', 'Mathematics', 'Integrated Science', 'Social Studies', 'RME', 'ICT', 'BDT', 'French', 'Ghanaian Language', 'Creative Arts', 'Career Technology'],
+            'JHS 3': ['English Language', 'Mathematics', 'Integrated Science', 'Social Studies', 'RME', 'ICT', 'BDT', 'French', 'Ghanaian Language', 'Creative Arts', 'Career Technology']
+        };
+
+        function getSubjects() {
+            var saved = JSON.parse(localStorage.getItem('sms_subjects') || 'null');
+            return saved || defaultSubjects;
+        }
+
+        function saveSubjects(data) {
+            localStorage.setItem('sms_subjects', JSON.stringify(data));
+        }
+
+        function addSubject() {
+            var cls = document.getElementById('selectClass').value;
+            var subject = document.getElementById('subjectName').value.trim();
+            if (!cls || !subject) { showToast('Select class and enter subject!'); return; }
+            
+            var subjects = getSubjects();
+            if (!subjects[cls]) subjects[cls] = [];
+            if (subjects[cls].indexOf(subject) !== -1) { showToast('Subject already exists for this class!'); return; }
+            
+            subjects[cls].push(subject);
+            saveSubjects(subjects);
+            document.getElementById('subjectName').value = '';
+            loadAllSubjects();
+            showToast('✅ ' + subject + ' added to ' + cls);
+        }
+
+        function removeSubject(cls, index) {
+            if (!confirm('Remove this subject?')) return;
+            var subjects = getSubjects();
+            subjects[cls].splice(index, 1);
+            saveSubjects(subjects);
+            loadAllSubjects();
+            showToast('Subject removed.');
+        }
+
+        function loadClassSubjects() {
+            // Already handled by loadAllSubjects
+        }
+
+        function loadAllSubjects() {
+            var subjects = getSubjects();
+            var classes = ['Crèche','Nursery 1','Nursery 2','KG 1','KG 2','Basic 1','Basic 2','Basic 3','Basic 4','Basic 5','Basic 6','JHS 1','JHS 2','JHS 3'];
+            
+            var html = '';
+            classes.forEach(function(cls){
+                var subs = subjects[cls] || [];
+                html += '<div class="card class-section">';
+                html += '<h4>🏫 ' + cls + ' <span style="font-size:11px;color:var(--text-light);">(' + subs.length + ' subjects)</span></h4>';
+                html += '<div class="subject-tags">';
+                if (subs.length === 0) {
+                    html += '<span style="color:var(--text-light);font-size:12px;">No subjects added yet.</span>';
+                } else {
+                    subs.forEach(function(sub, i){
+                        html += '<span class="subject-tag">📖 ' + sub + ' <span class="remove" onclick="removeSubject(\'' + cls + '\', ' + i + ')">✕</span></span>';
+                    });
+                }
+                html += '</div></div>';
+            });
+            document.getElementById('allSubjects').innerHTML = html;
+        }
+
+        function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(function() { t.style.display = 'none'; }, 2500); }
+        window.onload = function() { loadAllSubjects(); };
+    </script>
+</body>
+</html>

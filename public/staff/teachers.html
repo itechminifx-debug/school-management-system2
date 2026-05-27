@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #1e40af; --primary-dark: #1e3a8a; --primary-light: #eff6ff; --success: #059669; --warning: #d97706; --danger: #dc2626; --info: #2563eb; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header .brand { font-size: 18px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .header .brand .icon { width: 34px; height: 34px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; }
+        .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        
+        .main { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .page-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+        
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border-radius: 14px; padding: 5px; border: 1px solid var(--border); }
+        .tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-light); transition: all 0.2s; }
+        .tab.active { background: var(--primary); color: white; }
+        .panel { display: none; } .panel.active { display: block; }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px; margin-bottom: 20px; }
+        .card h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #f8fafc; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); } .btn-success { background: var(--success); } .btn-danger { background: var(--danger); }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table th { background: #f1f5f9; color: var(--text-light); padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
+        table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+        .badge-teacher { background: #dbeafe; color: #1e40af; } .badge-admin { background: #fef3c7; color: #92400e; } .badge-support { background: #d1fae5; color: #065f46; } .badge-other { background: #f4f4f5; color: #52525b; }
+        .btn-sm { padding: 5px 10px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-del { background: #fee2e2; color: #991b1b; }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+        .stat-card .value { font-size: 24px; font-weight: 800; color: var(--text); }
+        .stat-card .label { font-size: 10px; color: var(--text-light); text-transform: uppercase; }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        
+        @media (max-width: 800px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand"><div class="icon">🏫</div>School<span>Manager</span></div>
+        <a href="/dashboard.html">← Dashboard</a>
+    </div>
+
+    <div class="main">
+        <div class="page-header"><h1>👨‍🏫 Staff Management</h1></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('list')">📋 Staff List</button>
+            <button class="tab" onclick="switchTab('add')">➕ Add Staff</button>
+        </div>
+
+        <!-- LIST PANEL -->
+        <div id="panel-list" class="panel active">
+            <div class="stats-row">
+                <div class="stat-card"><div class="value" id="sTotal">0</div><div class="label">Total Staff</div></div>
+                <div class="stat-card"><div class="value" id="sTeachers">0</div><div class="label">Teachers</div></div>
+                <div class="stat-card"><div class="value" id="sNonTeaching">0</div><div class="label">Non-Teaching</div></div>
+                <div class="stat-card"><div class="value" id="sActive">0</div><div class="label">Active</div></div>
+            </div>
+            <div class="card"><div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Department</th><th>Phone</th><th>Qualification</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffTable"><tr><td colspan="8" style="text-align:center;color:var(--text-light);">Loading...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- ADD PANEL -->
+        <div id="panel-add" class="panel">
+            <div class="card">
+                <h3>📝 Add New Staff</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Title</label><select id="title"><option value="Mr.">Mr.</option><option value="Mrs.">Mrs.</option><option value="Ms.">Ms.</option><option value="Dr.">Dr.</option><option value="Pastor">Pastor</option></select></div>
+                    <div class="form-group"><label>First Name *</label><input type="text" id="firstName" placeholder="First name"></div>
+                    <div class="form-group"><label>Last Name *</label><input type="text" id="lastName" placeholder="Last name"></div>
+                    <div class="form-group"><label>Role *</label><select id="role"><option value="">Select Role</option><optgroup label="Teaching"><option value="Teacher">Teacher</option><option value="Head Teacher">Head Teacher</option><option value="Assistant Head">Assistant Head</option></optgroup><optgroup label="Non-Teaching"><option value="Administrator">Administrator</option><option value="Accountant">Accountant</option><option value="Secretary">Secretary</option><option value="Driver">Driver</option><option value="Cleaner">Cleaner</option><option value="Security">Security</option><option value="Cook">Cook</option><option value="Librarian">Librarian</option><option value="Other">Other</option></optgroup></select></div>
+                    <div class="form-group"><label>Department</label><select id="department"><option value="">Select</option><option value="Administration">Administration</option><option value="Academic">Academic</option><option value="Accounts">Accounts</option><option value="Transport">Transport</option><option value="Kitchen">Kitchen</option><option value="Security">Security</option><option value="Library">Library</option></select></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="phone" placeholder="0244-123-456"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="email@school.com"></div>
+                    <div class="form-group"><label>Qualification</label><input type="text" id="qualification" placeholder="e.g., B.Ed, M.Ed, Diploma"></div>
+                    <div class="form-group"><label>Date Employed</label><input type="date" id="dateEmployed"></div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-success" onclick="addStaff()">💾 Save Staff</button>
+                    <button class="btn btn-primary" onclick="addStaffAndNew()">💾 Save & New</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function getStaff() { return JSON.parse(localStorage.getItem('sms_staff') || '[]'); }
+        function saveStaff(data) { localStorage.setItem('sms_staff', JSON.stringify(data)); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+            document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+            if (tab === 'list') { document.querySelector('.tabs .tab:first-child').classList.add('active'); document.getElementById('panel-list').classList.add('active'); loadStaffTable(); }
+            else { document.querySelector('.tabs .tab:last-child').classList.add('active'); document.getElementById('panel-add').classList.add('active'); }
+        }
+
+        function addStaff() {
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var role = document.getElementById('role').value;
+            if (!firstName || !lastName || !role) { showToast('Fill required fields!'); return; }
+            
+            var staff = {
+                id: 'STF-' + String(getStaff().length + 1).padStart(3, '0'),
+                title: document.getElementById('title').value,
+                firstName: firstName, lastName: lastName, role: role,
+                department: document.getElementById('department').value,
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                qualification: document.getElementById('qualification').value.trim(),
+                dateEmployed: document.getElementById('dateEmployed').value || new Date().toLocaleDateString(),
+                status: 'Active'
+            };
+            
+            var staffList = getStaff(); staffList.push(staff); saveStaff(staffList);
+            clearForm(); switchTab('list');
+            showToast('✅ ' + staff.title + ' ' + staff.lastName + ' added!');
+        }
+
+        function addStaffAndNew() {
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var role = document.getElementById('role').value;
+            if (!firstName || !lastName || !role) { showToast('Fill required fields!'); return; }
+            
+            var staff = { id: 'STF-' + String(getStaff().length + 1).padStart(3, '0'), title: document.getElementById('title').value, firstName: firstName, lastName: lastName, role: role, department: document.getElementById('department').value, phone: document.getElementById('phone').value.trim(), email: document.getElementById('email').value.trim(), qualification: document.getElementById('qualification').value.trim(), dateEmployed: document.getElementById('dateEmployed').value || new Date().toLocaleDateString(), status: 'Active' };
+            
+            var staffList = getStaff(); staffList.push(staff); saveStaff(staffList);
+            clearForm(); showToast('✅ Saved! Add another.');
+        }
+
+        function clearForm() {
+            ['firstName','lastName','phone','email','qualification'].forEach(function(id){ document.getElementById(id).value = ''; });
+            document.getElementById('role').value = ''; document.getElementById('department').value = '';
+        }
+
+        function loadStaffTable() {
+            var staffList = getStaff();
+            document.getElementById('sTotal').textContent = staffList.length;
+            document.getElementById('sTeachers').textContent = staffList.filter(function(s){ return s.role === 'Teacher' || s.role === 'Head Teacher' || s.role === 'Assistant Head'; }).length;
+            document.getElementById('sNonTeaching').textContent = staffList.filter(function(s){ return !['Teacher','Head Teacher','Assistant Head'].includes(s.role); }).length;
+            document.getElementById('sActive').textContent = staffList.filter(function(s){ return s.status === 'Active'; }).length;
+
+            var tbody = document.getElementById('staffTable');
+            if (staffList.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">No staff added</td></tr>'; return; }
+            var html = '';
+            staffList.forEach(function(s){
+                var rc = 'badge-other';
+                if (s.role === 'Teacher' || s.role === 'Head Teacher') rc = 'badge-teacher';
+                else if (s.role === 'Administrator') rc = 'badge-admin';
+                else if (['Driver','Cleaner','Security','Cook'].includes(s.role)) rc = 'badge-support';
+                html += '<tr><td><strong>'+s.id+'</strong></td><td>'+s.title+' '+s.firstName+' '+s.lastName+'</td><td><span class="badge '+rc+'">'+s.role+'</span></td><td>'+(s.department||'-')+'</td><td>'+(s.phone||'-')+'</td><td>'+(s.qualification||'-')+'</td><td>'+(s.status||'Active')+'</td><td><button class="btn-sm btn-del" onclick="deleteStaff(\''+s.id+'\')">🗑</button></td></tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        function deleteStaff(id) { if (!confirm('Delete this staff?')) return; var staffList = getStaff().filter(function(s){ return s.id !== id; }); saveStaff(staffList); loadStaffTable(); showToast('Staff deleted.'); }
+        function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(function() { t.style.display = 'none'; }, 2500); }
+        window.onload = function() { loadStaffTable(); };
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Records | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; --danger: #dc2626; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .filter-bar { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .filter-bar select, .filter-bar input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; }
+        .filter-bar select { min-width: 180px; } .filter-bar input { flex: 1; min-width: 200px; }
+        .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--primary); }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+        .stat-card .value { font-size: 24px; font-weight: 800; color: var(--text); } .stat-card .label { font-size: 10px; color: var(--text-light); text-transform: uppercase; }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table th { background: var(--primary); color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; white-space: nowrap; }
+        table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        table tbody tr:hover td { background: #f0fdfa; }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); } .btn-print { background: #1e293b; } .btn-danger { background: var(--danger); }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-sm { padding: 5px 10px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        
+        .empty { text-align: center; padding: 40px; color: var(--text-light); }
+        
+        @media print { body * { visibility: hidden; } .print-area, .print-area * { visibility: visible; } .print-area { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; } .btn, .filter-bar, .header, .stats-row { display: none !important; } table th { background: #0d9488 !important; -webkit-print-color-adjust: exact; } }
+        @media (max-width: 700px) { .stats-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="brand">🏫 School<span>Manager</span> — Student Records</div><a href="../dashboard.html">← Dashboard</a></div>
+    <div class="main">
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <select id="filterClass" onchange="loadRecords()">
+                <option value="">All Classes</option>
+                <option value="Crèche">Crèche</option><option value="Nursery 1">Nursery 1</option><option value="Nursery 2">Nursery 2</option>
+                <option value="KG 1">KG 1</option><option value="KG 2">KG 2</option>
+                <option value="Basic 1">Basic 1</option><option value="Basic 2">Basic 2</option><option value="Basic 3">Basic 3</option>
+                <option value="Basic 4">Basic 4</option><option value="Basic 5">Basic 5</option><option value="Basic 6">Basic 6</option>
+                <option value="JHS 1">JHS 1</option><option value="JHS 2">JHS 2</option><option value="JHS 3">JHS 3</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="🔍 Search by name or ID..." oninput="loadRecords()">
+            <button class="btn btn-print" onclick="printRecords()">🖨️ Print List</button>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-card" style="border-left:4px solid var(--primary);"><div class="value" id="sTotal">0</div><div class="label">Total Students</div></div>
+            <div class="stat-card" style="border-left:4px solid var(--success);"><div class="value" id="sMale">0</div><div class="label">Male</div></div>
+            <div class="stat-card" style="border-left:4px solid var(--warning);"><div class="value" id="sFemale">0</div><div class="label">Female</div></div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card print-area" id="printArea">
+            <div style="overflow-x:auto;">
+                <table><thead><tr><th>ID</th><th>Name</th><th>Class</th><th>Gender</th><th>Date of Birth</th><th>Parent</th><th>Phone</th><th>Registered</th><th>Action</th></tr></thead>
+                    <tbody id="recordsBody"><tr><td colspan="9" class="empty">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        function getStudents() { var d=localStorage.getItem('sms_students'); return d?JSON.parse(d):[]; }
+        function saveStudents(data) { localStorage.setItem('sms_students', JSON.stringify(data)); }
+
+        function loadRecords() {
+            var students=getStudents();
+            var cls=document.getElementById('filterClass').value;
+            var search=(document.getElementById('searchInput').value||'').toLowerCase();
+            
+            if(cls) students=students.filter(function(s){return s.class===cls||s.className===cls;});
+            if(search) students=students.filter(function(s){return ((s.firstName||s.name||'')+' '+(s.lastName||'')).toLowerCase().includes(search)||(s.id||'').toLowerCase().includes(search);});
+            
+            students.sort(function(a,b){var na=(a.firstName||a.name||'')+' '+(a.lastName||''),nb=(b.firstName||b.name||'')+' '+(b.lastName||'');return na.localeCompare(nb);});
+            
+            document.getElementById('sTotal').textContent=students.length;
+            document.getElementById('sMale').textContent=students.filter(function(s){return s.gender==='Male';}).length;
+            document.getElementById('sFemale').textContent=students.filter(function(s){return s.gender==='Female';}).length;
+            
+            var tbody=document.getElementById('recordsBody');
+            if(students.length===0){tbody.innerHTML='<tr><td colspan="9" class="empty">No students found</td></tr>';return;}
+            var html='';
+            students.forEach(function(s){
+                html+='<tr><td><strong>'+(s.id||'-')+'</strong></td><td>'+(s.firstName||s.name||'')+' '+(s.lastName||'')+'</td><td>'+(s.class||s.className||'-')+'</td><td>'+(s.gender||'-')+'</td><td>'+(s.dob||'-')+'</td><td>'+(s.parentName||'-')+'</td><td>'+(s.parentPhone||'-')+'</td><td>'+(s.registeredDate||'-')+'</td>';
+                html+='<td><button class="btn btn-danger btn-sm" onclick="deleteStudent(\''+s.id+'\')">🗑 Delete</button></td></tr>';
+            });
+            tbody.innerHTML=html;
+        }
+
+        // 🔥 DELETE STUDENT FUNCTION
+        function deleteStudent(id) {
+            var students=getStudents();
+            var student=students.find(function(s){return s.id===id;});
+            if(!student) return;
+            var name=(student.firstName||student.name||'')+' '+(student.lastName||'');
+            if(!confirm('⚠️ Delete student: '+name+'?\n\nThis will permanently remove this student from the system.\n\nThis CANNOT be undone!')) return;
+            if(!confirm('FINAL CONFIRMATION: Delete '+name+'?')) return;
+            
+            // Remove student
+            students=students.filter(function(s){return s.id!==id;});
+            saveStudents(students);
+            
+            // Also remove their SBA records
+            var sba=JSON.parse(localStorage.getItem('sms_sba')||'[]');
+            sba=sba.filter(function(d){return d.studentId!==id;});
+            localStorage.setItem('sms_sba',JSON.stringify(sba));
+            
+            // Also remove their Exam records
+            var exams=JSON.parse(localStorage.getItem('sms_exams')||'[]');
+            exams=exams.filter(function(d){return d.studentId!==id;});
+            localStorage.setItem('sms_exams',JSON.stringify(exams));
+            
+            // Also remove their Fee records
+            var fees=JSON.parse(localStorage.getItem('sms_fees')||'[]');
+            fees=fees.filter(function(d){return d.studentId!==id;});
+            localStorage.setItem('sms_fees',JSON.stringify(fees));
+            
+            loadRecords();
+            showToast('🗑 '+name+' deleted successfully! All related records removed.');
+        }
+
+        function printRecords() { window.print(); }
+
+        function showToast(msg) {
+            var t=document.createElement('div');
+            t.style.cssText='position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:14px 28px;border-radius:50px;font-size:14px;z-index:1000;animation:slideDown 0.3s;';
+            t.textContent=msg;document.body.appendChild(t);
+            setTimeout(function(){t.remove();},2500);
+        }
+
+        window.onload=function(){loadRecords();};
+    </script>
+    <style>@keyframes slideDown{from{transform:translateX(-50%) translateY(-80px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}</style>
+</body>
+</html>

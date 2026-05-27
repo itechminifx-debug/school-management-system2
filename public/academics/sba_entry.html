@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBA Entry | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; --danger: #dc2626; --warning: #d97706; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+        
+        .selector-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .form-group select, .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #f8fafc; }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--primary); }
+        .student-count { font-size: 13px; color: var(--text-light); margin-top: 8px; }
+        
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1200px; }
+        table th { background: var(--primary); color: white; padding: 10px 6px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        table th.sub { background: #0f766e; font-size: 9px; }
+        table td { padding: 6px; border: 1px solid var(--border); text-align: center; color: var(--text); }
+        table td input { width: 50px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-size: 12px; }
+        table td.name-cell { width: 180px; text-align: left; font-weight: 600; padding-left: 8px; background: #f0fdfa; }
+        table td.calculated { background: #f1f5f9; font-weight: 700; color: var(--primary); }
+        table td.auto { background: #f0fdfa; font-weight: 700; }
+        
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 22px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); } .btn-success { background: var(--success); } .btn-warning { background: var(--warning); color: #1e293b; } .btn-danger { background: var(--danger); }
+        .btn-print { background: #1e293b; } .btn-dashboard { background: #64748b; }
+        .btn:hover { transform: translateY(-2px); }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        
+        @media print { body { background: white; } .header, .btn-row, .card:first-child, .toast { display: none !important; } .card { border: none; box-shadow: none; padding: 10px; } table { font-size: 10px; } table th { background: #0d9488 !important; -webkit-print-color-adjust: exact; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">🏫 School<span>Manager</span> — SBA Entry</div>
+        <a href="../dashboard.html">← Dashboard</a>
+    </div>
+    <div class="main">
+        <!-- SELECTORS -->
+        <div class="card">
+            <h3>📝 Select Class & Subject</h3>
+            <div class="selector-row">
+                <div class="form-group">
+                    <label>Class *</label>
+                    <select id="sbaClass" onchange="loadSBASheet()">
+                        <option value="">-- Select Class --</option>
+                        <optgroup label="👶 Early Years">
+                            <option value="Crèche">Crèche</option>
+                            <option value="Nursery 1">Nursery 1</option>
+                            <option value="Nursery 2">Nursery 2</option>
+                        </optgroup>
+                        <optgroup label="🧒 Kindergarten">
+                            <option value="KG 1">KG 1</option>
+                            <option value="KG 2">KG 2</option>
+                        </optgroup>
+                        <optgroup label="📚 Lower Primary">
+                            <option value="Basic 1">Basic 1</option>
+                            <option value="Basic 2">Basic 2</option>
+                            <option value="Basic 3">Basic 3</option>
+                        </optgroup>
+                        <optgroup label="📖 Upper Primary">
+                            <option value="Basic 4">Basic 4</option>
+                            <option value="Basic 5">Basic 5</option>
+                            <option value="Basic 6">Basic 6</option>
+                        </optgroup>
+                        <optgroup label="🎓 Junior High">
+                            <option value="JHS 1">JHS 1</option>
+                            <option value="JHS 2">JHS 2</option>
+                            <option value="JHS 3">JHS 3</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subject *</label>
+                    <input type="text" id="sbaSubject" placeholder="e.g., English Language" onchange="loadSBASheet()">
+                </div>
+                <div class="form-group">
+                    <label>Term</label>
+                    <select id="sbaTerm" onchange="loadSBASheet()">
+                        <option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+            </div>
+            <p class="student-count" id="studentCount">📋 Select a class and enter subject to load students from database.</p>
+        </div>
+
+        <!-- SBA TABLE -->
+        <div class="card" id="printArea">
+            <h3>📝 School Based Assessment Sheet</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">SN</th><th rowspan="2">NAME</th>
+                            <th>TEST 1</th><th>GROUP WORK</th><th>TEST 2</th><th>PROJECT</th>
+                            <th rowspan="2">SUB TOTAL<br>(60)</th><th rowspan="2">CLASS<br>50% (A)</th>
+                            <th rowspan="2">EXAM<br>100%</th><th rowspan="2">EXAM<br>50% (B)</th>
+                            <th rowspan="2">TOTAL<br>100%</th><th rowspan="2">GRADE</th>
+                            <th rowspan="2">POS</th><th rowspan="2">REMARKS</th>
+                        </tr>
+                        <tr>
+                            <th class="sub">(15)</th><th class="sub">(15)</th><th class="sub">(15)</th><th class="sub">(15)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sbaTableBody">
+                        <tr><td colspan="14" style="text-align:center;padding:40px;color:#999;">👆 Select a class and subject above to load students.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="btn-row">
+            <button class="btn btn-success" onclick="saveSBA()">💾 Save SBA</button>
+            <button class="btn btn-primary" onclick="autoCalc()">🔄 Auto Calculate</button>
+            <button class="btn btn-print" onclick="printSBA()">🖨️ Print SBA Sheet</button>
+            <button class="btn btn-warning" onclick="exportExcel()">📥 Download Excel</button>
+            <button class="btn btn-danger" onclick="clearSBA()">🗑 Clear</button>
+            <a href="../dashboard.html" class="btn btn-dashboard">🏠 Dashboard</a>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script>
+        var currentStudents = [];
+
+        function getStudents() { return JSON.parse(localStorage.getItem('sms_students')) || []; }
+        function getSBAData() { return JSON.parse(localStorage.getItem('sms_sba')) || []; }
+        function saveSBAData(data) { localStorage.setItem('sms_sba', JSON.stringify(data)); }
+
+        function loadSBASheet() {
+            var cls = document.getElementById('sbaClass').value;
+            var subject = document.getElementById('sbaSubject').value.trim();
+            if (!cls || !subject) return;
+
+            currentStudents = getStudents().filter(function(s) { return s.class === cls || s.className === cls; });
+            document.getElementById('studentCount').textContent = '✅ ' + currentStudents.length + ' students loaded from database.';
+            
+            var term = document.getElementById('sbaTerm').value;
+            var sbaData = getSBAData().filter(function(d) { return d.class === cls && d.subject === subject && d.term === term; });
+            var tbody = document.getElementById('sbaTableBody');
+            
+            if (currentStudents.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:40px;color:#999;">No students found in ' + cls + '. Register students first.</td></tr>'; 
+                return; 
+            }
+
+            var html = '';
+            currentStudents.forEach(function(s, i) {
+                var existing = sbaData.find(function(d) { return d.studentId === s.id; }) || {};
+                var studentName = (s.firstName || s.name || '') + ' ' + (s.lastName || '');
+                html += '<tr><td>' + (i + 1) + '</td><td class="name-cell">' + studentName + '</td>';
+                html += '<td><input type="number" id="t1_' + i + '" value="' + (existing.test1 || '') + '" min="0" max="15" oninput="calcRow(' + i + ')"></td>';
+                html += '<td><input type="number" id="gw_' + i + '" value="' + (existing.groupWork || '') + '" min="0" max="15" oninput="calcRow(' + i + ')"></td>';
+                html += '<td><input type="number" id="t2_' + i + '" value="' + (existing.test2 || '') + '" min="0" max="15" oninput="calcRow(' + i + ')"></td>';
+                html += '<td><input type="number" id="pr_' + i + '" value="' + (existing.project || '') + '" min="0" max="15" oninput="calcRow(' + i + ')"></td>';
+                html += '<td class="calculated" id="sub_' + i + '">' + (existing.subTotal || '') + '</td>';
+                html += '<td class="auto" id="ca_' + i + '">' + (existing.classA || '') + '</td>';
+                html += '<td><input type="number" id="ex_' + i + '" value="' + (existing.exam || '') + '" min="0" max="100" oninput="calcRow(' + i + ')"></td>';
+                html += '<td class="auto" id="eb_' + i + '">' + (existing.examB || '') + '</td>';
+                html += '<td class="auto" id="tot_' + i + '">' + (existing.total || '') + '</td>';
+                html += '<td class="auto" id="gr_' + i + '">' + (existing.grade || '') + '</td>';
+                html += '<td class="auto" id="pos_' + i + '">' + (existing.position || '') + '</td>';
+                html += '<td class="auto" id="rem_' + i + '">' + (existing.remarks || '') + '</td></tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        function calcRow(i) {
+            var t1 = parseFloat(document.getElementById('t1_' + i).value) || 0, gw = parseFloat(document.getElementById('gw_' + i).value) || 0, t2 = parseFloat(document.getElementById('t2_' + i).value) || 0, pr = parseFloat(document.getElementById('pr_' + i).value) || 0, ex = parseFloat(document.getElementById('ex_' + i).value) || 0;
+            var sub = Math.min(t1 + gw + t2 + pr, 60), ca = ((sub / 60) * 50).toFixed(1), eb = ((ex / 100) * 50).toFixed(1), tot = (parseFloat(ca) + parseFloat(eb)).toFixed(1);
+            document.getElementById('sub_' + i).textContent = sub; document.getElementById('ca_' + i).textContent = ca; document.getElementById('eb_' + i).textContent = eb; document.getElementById('tot_' + i).textContent = tot;
+            document.getElementById('gr_' + i).textContent = getGrade(parseFloat(tot)); document.getElementById('rem_' + i).textContent = getRemarks(parseFloat(tot));
+        }
+        function getGrade(s) { if (s >= 80) return 1; if (s >= 70) return 2; if (s >= 60) return 3; if (s >= 50) return 4; if (s >= 40) return 5; return 6; }
+        function getRemarks(s) { if (s >= 80) return 'Excellent'; if (s >= 70) return 'Very Good'; if (s >= 60) return 'Good'; if (s >= 50) return 'Average'; if (s >= 40) return 'Below Average'; return 'Weak'; }
+
+        function autoCalc() {
+            currentStudents.forEach(function(s, i) { calcRow(i); });
+            var totals = [];
+            currentStudents.forEach(function(s, i) { totals.push({ index: i, total: parseFloat(document.getElementById('tot_' + i).textContent) || 0 }); });
+            totals.sort(function(a, b) { return b.total - a.total; });
+            totals.forEach(function(t, r) { document.getElementById('pos_' + t.index).textContent = (r + 1 === 1 ? '1st' : (r + 1 === 2 ? '2nd' : (r + 1 === 3 ? '3rd' : (r + 1) + 'th'))); });
+            showToast('✅ Calculated! Ready to print.');
+        }
+
+        function saveSBA() {
+            var cls = document.getElementById('sbaClass').value, subject = document.getElementById('sbaSubject').value.trim(), term = document.getElementById('sbaTerm').value;
+            if (!cls || !subject) { showToast('Select class and enter subject!'); return; }
+            var allSBA = getSBAData();
+            allSBA = allSBA.filter(function(d) { return !(d.class === cls && d.subject === subject && d.term === term); });
+            currentStudents.forEach(function(s, i) {
+                var t1 = document.getElementById('t1_' + i).value;
+                if (t1 || document.getElementById('ex_' + i).value) {
+                    allSBA.push({ studentId: s.id, studentName: (s.firstName || s.name || '') + ' ' + (s.lastName || ''), class: cls, subject: subject, term: term, test1: t1 || '0', groupWork: document.getElementById('gw_' + i).value || '0', test2: document.getElementById('t2_' + i).value || '0', project: document.getElementById('pr_' + i).value || '0', subTotal: document.getElementById('sub_' + i).textContent, classA: document.getElementById('ca_' + i).textContent, exam: document.getElementById('ex_' + i).value || '0', examB: document.getElementById('eb_' + i).textContent, total: document.getElementById('tot_' + i).textContent, grade: document.getElementById('gr_' + i).textContent, position: document.getElementById('pos_' + i).textContent, remarks: document.getElementById('rem_' + i).textContent });
+                }
+            });
+            saveSBAData(allSBA); showToast('✅ SBA saved!');
+        }
+
+        // 🔥 PRINT FUNCTION
+        function printSBA() {
+            var cls = document.getElementById('sbaClass').value;
+            var subject = document.getElementById('sbaSubject').value;
+            if (!cls || !subject) { showToast('Select class and enter subject first!'); return; }
+            if (currentStudents.length === 0) { showToast('No students loaded! Select a class first.'); return; }
+            autoCalc(); // Auto-calculate before printing
+            setTimeout(function() { window.print(); }, 500);
+        }
+
+        function exportExcel() {
+            var cls = document.getElementById('sbaClass').value, subject = document.getElementById('sbaSubject').value, term = document.getElementById('sbaTerm').value;
+            var data = [['SBA SHEET - ' + cls + ' - ' + subject + ' - ' + term], []];
+            data.push(['SN', 'NAME', 'TEST 1', 'GROUP', 'TEST 2', 'PROJECT', 'SUB TOTAL', 'CLASS 50%', 'EXAM', 'EXAM 50%', 'TOTAL', 'GRADE', 'POS', 'REMARKS']);
+            currentStudents.forEach(function(s, i) { data.push([i + 1, (s.firstName || s.name || '') + ' ' + (s.lastName || ''), document.getElementById('t1_' + i).value || '0', document.getElementById('gw_' + i).value || '0', document.getElementById('t2_' + i).value || '0', document.getElementById('pr_' + i).value || '0', document.getElementById('sub_' + i).textContent, document.getElementById('ca_' + i).textContent, document.getElementById('ex_' + i).value || '0', document.getElementById('eb_' + i).textContent, document.getElementById('tot_' + i).textContent, document.getElementById('gr_' + i).textContent, document.getElementById('pos_' + i).textContent, document.getElementById('rem_' + i).textContent]); });
+            var ws = XLSX.utils.aoa_to_sheet(data), wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'SBA'); XLSX.writeFile(wb, 'SBA_' + cls + '_' + subject + '.xlsx'); showToast('✅ Downloaded!');
+        }
+
+        function clearSBA() { if (!confirm('Clear this SBA sheet?')) return; document.getElementById('sbaClass').value = ''; document.getElementById('sbaSubject').value = ''; currentStudents = []; document.getElementById('sbaTableBody').innerHTML = '<tr><td colspan="14" style="text-align:center;padding:40px;color:#999;">👆 Select a class and subject above to load students.</td></tr>'; showToast('Cleared!'); }
+        function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(function() { t.style.display = 'none'; }, 2500); }
+    </script>
+</body>
+</html>

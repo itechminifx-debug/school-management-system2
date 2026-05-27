@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .header .brand { font-size: 18px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header .btn-logout { background: #fee2e2; color: #dc2626; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .main { max-width: 800px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+        .welcome { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+        .subtitle { color: var(--text-light); margin-bottom: 30px; }
+        .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px; margin: 0 auto; }
+        .module-card { background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 30px; text-decoration: none; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .module-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .module-card .icon { font-size: 48px; }
+        .module-card .name { font-size: 16px; font-weight: 700; color: var(--text); }
+        .module-card .desc { font-size: 12px; color: var(--text-light); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">🏫 Teacher<span>Portal</span></div>
+        <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+    </div>
+    <div class="main">
+        <div class="welcome">Welcome, <span id="teacherName">Teacher</span> 👋</div>
+        <p class="subtitle">You have access to SBA and Exams entry.</p>
+        <div class="module-grid">
+            <a href="academics/sba_entry.html" class="module-card">
+                <div class="icon">📝</div><div class="name">SBA Entry</div><div class="desc">Enter assessment scores</div>
+            </a>
+            <a href="academics/exams_entry.html" class="module-card">
+                <div class="icon">📄</div><div class="name">Exams Entry</div><div class="desc">Enter exam scores</div>
+            </a>
+        </div>
+    </div>
+    <script>
+        var user=JSON.parse(localStorage.getItem('sms_current_user')||'{}');
+        document.getElementById('teacherName').textContent=user.name||'Teacher';
+        if(user.role!=='Teacher'){window.location.href='dashboard.html';}
+        function logout(){localStorage.removeItem('sms_current_user');window.location.href='index.html';}
+    </script>
+</body>
+</html>

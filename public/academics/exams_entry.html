@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exams Entry | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; --danger: #dc2626; --warning: #d97706; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+        .selector-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .form-group select, .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #f8fafc; }
+        .student-count { font-size: 13px; color: var(--text-light); }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        table th { background: var(--primary); color: white; padding: 10px 6px; text-align: center; font-size: 10px; text-transform: uppercase; }
+        table td { padding: 6px; border: 1px solid var(--border); text-align: center; }
+        table td input { width: 60px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-size: 14px; }
+        table td.name-cell { text-align: left; font-weight: 600; padding-left: 8px; background: #f0fdfa; width: 200px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 22px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; color: white; transition: all 0.2s; text-decoration: none; }
+        .btn-primary { background: var(--primary); } .btn-success { background: var(--success); } .btn-dashboard { background: #64748b; }
+        .btn:hover { transform: translateY(-2px); }
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="brand">🏫 School<span>Manager</span> — Exams Entry</div><a href="../dashboard.html">← Dashboard</a></div>
+    <div class="main">
+        <div class="card">
+            <h3>📝 Select Class & Subject</h3>
+            <div class="selector-row">
+                <div class="form-group"><label>Class *</label><select id="examClass" onchange="loadExamSheet()"><option value="">-- Select Class --</option><option value="Crèche">Crèche</option><option value="Nursery 1">Nursery 1</option><option value="Nursery 2">Nursery 2</option><option value="KG 1">KG 1</option><option value="KG 2">KG 2</option><option value="Basic 1">Basic 1</option><option value="Basic 2">Basic 2</option><option value="Basic 3">Basic 3</option><option value="Basic 4">Basic 4</option><option value="Basic 5">Basic 5</option><option value="Basic 6">Basic 6</option><option value="JHS 1">JHS 1</option><option value="JHS 2">JHS 2</option><option value="JHS 3">JHS 3</option></select></div>
+                <div class="form-group"><label>Subject *</label><input type="text" id="examSubject" placeholder="e.g., English Language" onchange="loadExamSheet()"></div>
+                <div class="form-group"><label>Term</label><select id="examTerm"><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select></div>
+            </div>
+            <p class="student-count" id="studentCount">📋 Select a class and enter subject to load students.</p>
+        </div>
+
+        <div class="card">
+            <h3>📝 Exam Scores (Out of 100)</h3>
+            <table><thead><tr><th>SN</th><th>NAME</th><th>Exam Score (100)</th><th>Exam 50% (B)</th></tr></thead><tbody id="examTableBody"><tr><td colspan="4" style="text-align:center;padding:40px;color:#999;">👆 Select a class and subject above to load students.</td></tr></tbody></table>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-success" onclick="saveExams()">💾 Save Exam Scores</button>
+            <a href="../dashboard.html" class="btn btn-dashboard">🏠 Dashboard</a>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        var currentStudents = [];
+        function getStudents() { var d=localStorage.getItem('sms_students'); return d?JSON.parse(d):[]; }
+        function getExamData() { var d=localStorage.getItem('sms_exams'); return d?JSON.parse(d):[]; }
+        function saveExamData(data) { localStorage.setItem('sms_exams', JSON.stringify(data)); }
+
+        function loadExamSheet() {
+            var cls=document.getElementById('examClass').value, subject=document.getElementById('examSubject').value.trim();
+            if(!cls||!subject) return;
+            currentStudents=getStudents().filter(function(s){return s.class===cls||s.className===cls;});
+            document.getElementById('studentCount').textContent='✅ '+currentStudents.length+' students loaded.';
+            var term=document.getElementById('examTerm').value;
+            var examData=getExamData().filter(function(d){return d.class===cls&&d.subject===subject&&d.term===term;});
+            var tbody=document.getElementById('examTableBody');
+            if(currentStudents.length===0){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:40px;">No students found.</td></tr>';return;}
+            var html='';
+            currentStudents.forEach(function(s,i){
+                var existing=examData.find(function(d){return d.studentId===s.id;})||{};
+                var name=(s.firstName||s.name||'')+' '+(s.lastName||'');
+                var score=existing.examScore||existing.exam||existing.ExamScore||'';
+                var eb=score?((parseFloat(score)/100)*50).toFixed(1):'';
+                html+='<tr><td>'+(i+1)+'</td><td class="name-cell">'+name+'</td>';
+                html+='<td><input type="number" id="sc_'+i+'" value="'+score+'" min="0" max="100" oninput="calcExam('+i+')"></td>';
+                html+='<td style="font-weight:700;color:var(--primary);" id="eb_'+i+'">'+eb+'</td></tr>';
+            });
+            tbody.innerHTML=html;
+        }
+
+        function calcExam(i){
+            var sc=parseFloat(document.getElementById('sc_'+i).value)||0;
+            document.getElementById('eb_'+i).textContent=sc>0?((sc/100)*50).toFixed(1):'';
+        }
+
+        function saveExams(){
+            var cls=document.getElementById('examClass').value, subject=document.getElementById('examSubject').value.trim(), term=document.getElementById('examTerm').value;
+            if(!cls||!subject){showToast('Select class and enter subject!');return;}
+            var allExams=getExamData();
+            allExams=allExams.filter(function(d){return!(d.class===cls&&d.subject===subject&&d.term===term);});
+            var saved=0;
+            currentStudents.forEach(function(s,i){
+                var sc=document.getElementById('sc_'+i).value;
+                if(sc){
+                    allExams.push({studentId:s.id,studentName:(s.firstName||s.name||'')+' '+(s.lastName||''),class:cls,subject:subject,term:term,examScore:sc,exam:sc,ExamScore:sc,Exam:sc,examB:((parseFloat(sc)/100)*50).toFixed(1)});
+                    saved++;
+                }
+            });
+            saveExamData(allExams);showToast('✅ '+saved+' exam scores saved!');
+        }
+
+        function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
+    </script>
+</body>
+</html>

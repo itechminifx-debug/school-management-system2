@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --success: #059669; --danger: #dc2626; --warning: #d97706; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+        .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--text); text-transform: uppercase; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        table th { background: var(--primary); color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+        .badge-admin { background: #d1fae5; color: #065f46; } .badge-teacher { background: #dbeafe; color: #1e40af; } .badge-accountant { background: #fef3c7; color: #92400e; }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; }
+        .btn-success { background: var(--success); } .btn-danger { background: var(--danger); }
+        .btn-sm { padding: 5px 10px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        
+        .info-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; margin-bottom: 18px; font-size: 13px; line-height: 1.6; }
+        .info-box strong { color: #1e40af; }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="brand">🏫 School<span>Manager</span> — Users</div><a href="../dashboard.html">← Dashboard</a></div>
+    <div class="main">
+        <!-- ROLE INFO -->
+        <div class="info-box">
+            <strong>🔐 Role-Based Access:</strong><br>
+            <strong>👑 Admin</strong> — Full access to all pages<br>
+            <strong>👨‍🏫 Teacher</strong> — SBA Entry & Exams Entry ONLY<br>
+            <strong>💰 Accountant</strong> — Fees & Payroll ONLY
+        </div>
+
+        <!-- ADD USER -->
+        <div class="card"><h3>➕ Add System User</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="userName" placeholder="Full name"></div>
+                <div class="form-group"><label>Username *</label><input type="text" id="userUsername" placeholder="Login username"></div>
+                <div class="form-group"><label>Role *</label><select id="userRole"><option value="Admin">👑 Admin</option><option value="Teacher" selected>👨‍🏫 Teacher</option><option value="Accountant">💰 Accountant</option></select></div>
+                <button class="btn btn-success" onclick="addUser()" style="height:42px;">➕ Add</button>
+            </div>
+            <div class="form-grid" style="margin-top:8px;">
+                <div class="form-group"><label>Password</label><input type="text" id="userPassword" placeholder="Password" value="1234"></div>
+            </div>
+        </div>
+
+        <!-- USER LIST -->
+        <div class="card"><h3>📋 System Users</h3><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Password</th><th>Access</th><th>Action</th></tr></thead><tbody id="usersTable"><tr><td colspan="6" style="text-align:center;color:#999;">Loading...</td></tr></tbody></table></div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        var user = JSON.parse(localStorage.getItem('sms_current_user') || '{}');
+if (!user.role || user.role !== 'Admin') {
+    alert('⛔ Access Denied!');
+    window.location.href = '../index.html';
+}
+        var defaultUsers = [
+            {name:'Administrator',username:'admin',password:'1234',role:'Admin'},
+            {name:'Teacher',username:'teacher',password:'1234',role:'Teacher'},
+            {name:'Accountant',username:'accountant',password:'1234',role:'Accountant'}
+        ];
+
+        function getUsers() { var d=localStorage.getItem('sms_users'); return d?JSON.parse(d):defaultUsers; }
+        function saveUsers(data) { localStorage.setItem('sms_users', JSON.stringify(data)); }
+
+        function addUser() {
+            var name=document.getElementById('userName').value.trim(), username=document.getElementById('userUsername').value.trim(), role=document.getElementById('userRole').value, password=document.getElementById('userPassword').value||'1234';
+            if(!name||!username){showToast('Fill name and username!');return;}
+            var users=getUsers();
+            if(users.find(function(u){return u.username===username;})){showToast('Username already exists!');return;}
+            users.push({name:name,username:username,password:password,role:role});
+            saveUsers(users);
+            document.getElementById('userName').value='';document.getElementById('userUsername').value='';
+            loadUsersTable();showToast('✅ User added! Role: '+role);
+        }
+
+        function loadUsersTable() {
+            var users=getUsers();var tbody=document.getElementById('usersTable');
+            var html='';
+            users.forEach(function(u,i){
+                var rc='badge-admin';if(u.role==='Teacher')rc='badge-teacher';if(u.role==='Accountant')rc='badge-accountant';
+                var access='';
+                if(u.role==='Admin')access='All pages';
+                else if(u.role==='Teacher')access='SBA + Exams only';
+                else if(u.role==='Accountant')access='Fees + Payroll only';
+                html+='<tr><td>'+u.name+'</td><td>'+u.username+'</td><td><span class="badge '+rc+'">'+u.role+'</span></td><td>'+u.password+'</td><td style="font-size:11px;">'+access+'</td><td><button class="btn btn-danger btn-sm" onclick="deleteUser('+i+')">🗑</button></td></tr>';
+            });
+            tbody.innerHTML=html;
+        }
+
+        function deleteUser(i){
+            var users=getUsers();
+            if(users[i].username==='admin'){showToast('Cannot delete admin!');return;}
+            if(!confirm('Delete user: '+users[i].name+'?'))return;
+            users.splice(i,1);saveUsers(users);loadUsersTable();showToast('User deleted.');
+        }
+
+        function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
+        window.onload=function(){if(!localStorage.getItem('sms_users')){saveUsers(defaultUsers);}loadUsersTable();};
+    </script>
+</body>
+</html>

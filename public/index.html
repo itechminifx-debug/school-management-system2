@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; --danger: #dc2626; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .login-card { background: white; border-radius: 24px; padding: 40px; width: 100%; max-width: 440px; box-shadow: 0 25px 60px rgba(0,0,0,0.08); }
+        .login-card .school { text-align: center; margin-bottom: 30px; }
+        .login-card .school .icon { font-size: 40px; margin-bottom: 8px; }
+        .login-card .school h2 { font-size: 16px; color: var(--text); font-weight: 700; }
+        .login-card .school h1 { font-size: 20px; color: var(--primary); font-weight: 800; margin-top: 4px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .form-group input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 15px; background: #f8fafc; }
+        .form-group input:focus { outline: none; border-color: var(--primary); }
+        .error-msg { color: var(--danger); font-size: 12px; margin-top: 6px; display: none; }
+        .btn-login { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .btn-login:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .footer { text-align: center; color: var(--text-light); font-size: 11px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="school">
+            <div class="icon">🏫</div>
+            <h2>Living Spring Adventist Academy</h2>
+            <h1>School Management System</h1>
+        </div>
+        <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Enter your username"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="Enter your password"><div class="error-msg" id="errorMsg">Invalid username or password!</div></div>
+        <button class="btn-login" onclick="login()">🔐 Sign In</button>
+        <div class="footer">© 2025 iTech Systems Solutions</div>
+    </div>
+    <script>
+        var defaultUsers = [
+            { name: 'Administrator', username: 'admin', password: '1234', role: 'Admin' },
+            { name: 'Teacher', username: 'teacher', password: '1234', role: 'Teacher' },
+            { name: 'Accountant', username: 'accountant', password: '1234', role: 'Accountant' }
+        ];
+
+        function getUsers() {
+            var d = localStorage.getItem('sms_users');
+            if (!d) {
+                localStorage.setItem('sms_users', JSON.stringify(defaultUsers));
+                return defaultUsers;
+            }
+            try { return JSON.parse(d); } catch(e) { return defaultUsers; }
+        }
+
+        function login() {
+            var username = document.getElementById('username').value.trim();
+            var password = document.getElementById('password').value.trim();
+            var errorMsg = document.getElementById('errorMsg');
+            errorMsg.style.display = 'none';
+
+            if (!username || !password) {
+                errorMsg.textContent = 'Please enter username and password!';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            var users = getUsers();
+            var user = users.find(function(u) {
+                return u.username === username && u.password === password;
+            });
+
+            if (user) {
+                // Save current user
+                localStorage.setItem('sms_current_user', JSON.stringify(user));
+
+                // 🔥 REDIRECT BASED ON ROLE
+                if (user.role === 'Admin') {
+                    window.location.href = 'dashboard.html';
+                } else if (user.role === 'Teacher') {
+                    window.location.href = 'teacher_dashboard.html';
+                } else if (user.role === 'Accountant') {
+                    window.location.href = 'accountant_dashboard.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } else {
+                errorMsg.textContent = 'Invalid username or password! Try admin / 1234';
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Allow Enter key to login
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+</body>
+</html>

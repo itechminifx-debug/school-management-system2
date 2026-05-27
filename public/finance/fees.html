@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fees Management | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; --danger: #dc2626; --warning: #d97706; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border-radius: 14px; padding: 5px; border: 1px solid var(--border); }
+        .tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-light); }
+        .tab.active { background: var(--primary); color: white; }
+        .panel { display: none; } .panel.active { display: block; }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+        .stat-card .value { font-size: 22px; font-weight: 800; color: var(--text); } .stat-card .label { font-size: 10px; color: var(--text-light); text-transform: uppercase; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: end; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--text); text-transform: uppercase; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        table th { background: var(--primary); color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+        .badge-paid { background: #d1fae5; color: #065f46; } .badge-partial { background: #fef3c7; color: #92400e; }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); } .btn-success { background: var(--success); } .btn-danger { background: var(--danger); } .btn-warning { background: var(--warning); color: #1e293b; }
+        .btn-print { background: #1e293b; }
+        .btn-sm { padding: 5px 10px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+        
+        .arrears-card { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+        .arrears-card .name { font-weight: 700; color: var(--text); }
+        .arrears-card .owing { color: #dc2626; font-weight: 700; }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        
+        @media print { body * { visibility: hidden; } .print-area, .print-area * { visibility: visible; } .print-area { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; } .btn, .btn-row, .tabs, .header { display: none !important; } }
+        @media (max-width: 700px) { .stats-row { grid-template-columns: 1fr 1fr; } .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="brand">🏫 School<span>Manager</span> — Fees</div><a href="../dashboard.html">← Dashboard</a></div>
+    <div class="main">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('record')">📝 Record Payment</button>
+            <button class="tab" onclick="switchTab('list')">📋 Payment History</button>
+            <button class="tab" onclick="switchTab('arrears')">⚠️ Arrears</button>
+        </div>
+
+        <!-- RECORD PAYMENT -->
+        <div id="panel-record" class="panel active">
+            <div class="card"><h3>💰 Record Fee Payment</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Student *</label><select id="feeStudent" onchange="showStudentInfo()"><option value="">Select Student</option></select></div>
+                    <div class="form-group"><label>Full Term Fee (GHS)</label><input type="number" id="fullTermFee" placeholder="e.g., 500" step="0.01" oninput="updateArrears()"></div>
+                    <div class="form-group"><label>Amount Paying Now (GHS) *</label><input type="number" id="feeAmount" placeholder="0.00" step="0.01" oninput="updateArrears()"></div>
+                    <div class="form-group"><label>Payment Method</label><select id="feeMethod"><option value="Cash">Cash</option><option value="Mobile Money">Mobile Money</option><option value="Bank">Bank Transfer</option></select></div>
+                    <div class="form-group"><label>Term</label><select id="feeTerm"><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select></div>
+                    <div class="form-group"><label>Academic Year</label><input type="text" id="feeYear" value="2025/2026"></div>
+                </div>
+                <div id="studentInfoCard" style="display:none;background:#f0fdfa;padding:12px;border-radius:10px;margin-bottom:12px;"></div>
+                <div id="arrearsPreview" style="display:none;background:#fef3c7;padding:12px;border-radius:10px;margin-bottom:12px;font-weight:600;"></div>
+                <button class="btn btn-success" onclick="recordPayment()">💾 Record Payment</button>
+            </div>
+        </div>
+
+        <!-- PAYMENT HISTORY -->
+        <div id="panel-list" class="panel">
+            <div class="stats-row">
+                <div class="stat-card" style="border-left:4px solid var(--primary);"><div class="value" id="sTotalCollected">GHS 0</div><div class="label">Total Collected</div></div>
+                <div class="stat-card" style="border-left:4px solid var(--warning);"><div class="value" id="sTotalPending">GHS 0</div><div class="label">Outstanding</div></div>
+                <div class="stat-card" style="border-left:4px solid var(--success);"><div class="value" id="sTotalStudents">0</div><div class="label">Fully Paid</div></div>
+                <div class="stat-card" style="border-left:4px solid var(--danger);"><div class="value" id="sWithArrears">0</div><div class="label">With Arrears</div></div>
+            </div>
+            <div class="card print-area" id="printHistory">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                    <h3 style="margin:0;">📋 Payment History</h3>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-print" onclick="printSection('printHistory')">🖨️ Print History</button>
+                        <button class="btn btn-danger" style="padding:8px 14px;font-size:11px;" onclick="clearPaymentHistory()">🗑 Clear All</button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Student</th><th>Paid</th><th>Term Fee</th><th>Arrears</th><th>Method</th><th>Status</th><th>Action</th></tr></thead><tbody id="feeTableBody"><tr><td colspan="8" style="text-align:center;color:#999;">Loading...</td></tr></tbody></table></div>
+            </div>
+        </div>
+
+        <!-- ARREARS -->
+        <div id="panel-arrears" class="panel">
+            <div class="card print-area" id="printArrears">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <h3 style="margin:0;">⚠️ Students with Arrears</h3>
+                    <button class="btn btn-print" onclick="printSection('printArrears')">🖨️ Print Arrears</button>
+                </div>
+                <div id="arrearsList"><p style="text-align:center;color:#999;">Loading...</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        function getStudents() { var d=localStorage.getItem('sms_students'); return d?JSON.parse(d):[]; }
+        function getFees() { var d=localStorage.getItem('sms_fees'); return d?JSON.parse(d):[]; }
+        function saveFees(data) { localStorage.setItem('sms_fees', JSON.stringify(data)); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+            document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+            if(tab==='record'){document.querySelectorAll('.tab')[0].classList.add('active');document.getElementById('panel-record').classList.add('active');loadStudentDropdown();}
+            else if(tab==='list'){document.querySelectorAll('.tab')[1].classList.add('active');document.getElementById('panel-list').classList.add('active');loadFeeTable();}
+            else {document.querySelectorAll('.tab')[2].classList.add('active');document.getElementById('panel-arrears').classList.add('active');loadArrears();}
+        }
+
+        function loadStudentDropdown() {
+            var sel=document.getElementById('feeStudent');
+            sel.innerHTML='<option value="">Select Student</option>';
+            getStudents().forEach(function(s){ sel.innerHTML+='<option value="'+s.id+'">'+(s.firstName||s.name||'')+' '+(s.lastName||'')+' ('+(s.class||'')+')</option>'; });
+        }
+
+        function showStudentInfo() {
+            var sid=document.getElementById('feeStudent').value;
+            if(!sid){document.getElementById('studentInfoCard').style.display='none';return;}
+            var s=getStudents().find(function(x){return x.id===sid;});
+            if(!s)return;
+            var fees=getFees().filter(function(f){return f.studentId===sid;});
+            var totalPaid=fees.reduce(function(sum,f){return sum+(f.amount||0);},0);
+            var fullFee=parseFloat(document.getElementById('fullTermFee').value)||0;
+            document.getElementById('studentInfoCard').style.display='block';
+            document.getElementById('studentInfoCard').innerHTML='<strong>'+(s.firstName||s.name||'')+' '+ (s.lastName||'')+'</strong> | Class: '+(s.class||'')+' | Total Paid: <strong>GHS '+totalPaid.toFixed(2)+'</strong>'+(fullFee>0?' | Arrears: <strong style="color:'+(totalPaid>=fullFee?'#059669':'#dc2626')+';">GHS '+(fullFee-totalPaid).toFixed(2)+'</strong>':'');
+        }
+
+        function updateArrears() {
+            var fullFee=parseFloat(document.getElementById('fullTermFee').value)||0, paying=parseFloat(document.getElementById('feeAmount').value)||0, sid=document.getElementById('feeStudent').value;
+            if(!sid||fullFee<=0)return;
+            var fees=getFees().filter(function(f){return f.studentId===sid;});
+            var totalPaid=fees.reduce(function(sum,f){return sum+(f.amount||0);},0)+paying, arrears=fullFee-totalPaid;
+            var preview=document.getElementById('arrearsPreview');
+            if(paying>0){preview.style.display='block';preview.innerHTML=totalPaid>=fullFee?'✅ <strong>Full payment!</strong> No arrears.':'⚠️ <strong>Partial payment.</strong> After this: GHS '+totalPaid.toFixed(2)+' paid. Arrears: <strong>GHS '+arrears.toFixed(2)+'</strong>';preview.style.background=totalPaid>=fullFee?'#d1fae5':'#fef3c7';}
+            else{preview.style.display='none';}
+        }
+
+        function recordPayment() {
+            var sid=document.getElementById('feeStudent').value, amt=parseFloat(document.getElementById('feeAmount').value)||0, fullFee=parseFloat(document.getElementById('fullTermFee').value)||0;
+            if(!sid||amt<=0){showToast('Select student and enter amount!');return;}
+            var student=getStudents().find(function(s){return s.id===sid;});
+            var fees=getFees().filter(function(f){return f.studentId===sid;});
+            var totalPaid=fees.reduce(function(sum,f){return sum+(f.amount||0);},0)+amt, arrears=fullFee>0?fullFee-totalPaid:0;
+            fees=getFees();
+            fees.push({id:'FEE-'+Date.now(),studentId:sid,studentName:student?(student.firstName||student.name||'')+' '+(student.lastName||''):'',amount:amt,fullTermFee:fullFee,totalPaid:totalPaid,arrears:arrears>0?arrears:0,method:document.getElementById('feeMethod').value,term:document.getElementById('feeTerm').value,year:document.getElementById('feeYear').value,status:totalPaid>=fullFee?'Paid':'Partial',date:new Date().toLocaleDateString()});
+            saveFees(fees);
+            document.getElementById('feeAmount').value='';document.getElementById('fullTermFee').value='';document.getElementById('arrearsPreview').style.display='none';
+            showToast('✅ Payment recorded! GHS '+amt.toFixed(2));
+        }
+
+        function loadFeeTable() {
+            var fees=getFees();fees.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+            var total=fees.reduce(function(s,f){return s+(f.amount||0);},0);
+            var uniquePaid=new Set(fees.map(function(f){return f.studentId;}));
+            document.getElementById('sTotalCollected').textContent='GHS '+total.toLocaleString();
+            document.getElementById('sTotalStudents').textContent=uniquePaid.size;
+            var students=getStudents(),withArrears=0,totalOwing=0;
+            students.forEach(function(s){var sfees=fees.filter(function(f){return f.studentId===s.id;});var paid=sfees.reduce(function(sum,f){return sum+(f.amount||0);},0);var full=sfees.length>0?(sfees[0].fullTermFee||0):0;if(full>0&&paid<full){withArrears++;totalOwing+=(full-paid);}});
+            document.getElementById('sTotalPending').textContent='GHS '+totalOwing.toLocaleString();
+            document.getElementById('sWithArrears').textContent=withArrears;
+            var tbody=document.getElementById('feeTableBody');
+            if(fees.length===0){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#999;">No payments</td></tr>';return;}
+            var html='';
+            fees.forEach(function(f,i){html+='<tr><td>'+f.date+'</td><td><strong>'+f.studentName+'</strong></td><td>GHS '+(f.amount||0).toFixed(2)+'</td><td>'+(f.fullTermFee?'GHS '+f.fullTermFee.toFixed(2):'-')+'</td><td style="color:'+(f.arrears>0?'#dc2626':'#059669')+';">'+(f.arrears>0?'GHS '+f.arrears.toFixed(2):'None')+'</td><td>'+f.method+'</td><td><span class="badge '+(f.status==='Paid'?'badge-paid':'badge-partial')+'">'+f.status+'</span></td><td><button class="btn btn-danger" style="padding:4px 8px;font-size:10px;" onclick="deleteSingle('+i+')">🗑</button></td></tr>';});
+            tbody.innerHTML=html;
+        }
+
+        function deleteSingle(index){if(!confirm('Delete this payment?'))return;var fees=getFees();fees.splice(index,1);saveFees(fees);loadFeeTable();showToast('Deleted.');}
+        function clearPaymentHistory(){if(!confirm('⚠️⚠️ DELETE ALL PAYMENT HISTORY?'))return;if(!confirm('FINAL: This cannot be undone!'))return;saveFees([]);loadFeeTable();showToast('🗑 All history cleared!');}
+
+        function loadArrears() {
+            var students=getStudents(),fees=getFees(),html='';
+            students.forEach(function(s){
+                var sfees=fees.filter(function(f){return f.studentId===s.id;}),paid=sfees.reduce(function(sum,f){return sum+(f.amount||0);},0),full=sfees.length>0?(sfees[0].fullTermFee||0):0;
+                if(full>0&&paid<full){html+='<div class="arrears-card"><span class="name">'+(s.firstName||s.name||'')+' '+ (s.lastName||'')+'</span> ('+(s.class||'')+') | Paid: GHS '+paid.toFixed(2)+' / GHS '+full.toFixed(2)+' | <span class="owing">Arrears: GHS '+(full-paid).toFixed(2)+'</span></div>';}
+            });
+            document.getElementById('arrearsList').innerHTML=html||'<p style="text-align:center;color:#059669;">✅ No students with arrears!</p>';
+        }
+
+        function printSection(id) { var el = document.getElementById(id); el.classList.add('print-area'); window.print(); }
+
+        function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
+        window.onload=function(){loadStudentDropdown();};
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll | School Management System</title>
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; --danger: #dc2626; --warning: #d97706; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; }
+        .header { background: white; border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+        .header .brand { font-size: 16px; font-weight: 700; color: var(--text); } .header .brand span { color: var(--primary); }
+        .header a { text-decoration: none; color: var(--primary); font-weight: 600; font-size: 13px; }
+        .main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border-radius: 14px; padding: 5px; border: 1px solid var(--border); }
+        .tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-light); }
+        .tab.active { background: var(--primary); color: white; }
+        .panel { display: none; } .panel.active { display: block; }
+        
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+        .stat-card .value { font-size: 22px; font-weight: 800; color: var(--text); } .stat-card .label { font-size: 10px; color: var(--text-light); text-transform: uppercase; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 10px; font-weight: 700; color: var(--text); text-transform: uppercase; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        table th { background: var(--primary); color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-success { background: var(--success); } .btn-danger { background: var(--danger); } .btn-print { background: #1e293b; }
+        .btn-sm { padding: 5px 10px; font-size: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 28px; border-radius: 50px; font-size: 14px; z-index: 1000; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-80px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        
+        @media print { body * { visibility: hidden; } .print-area, .print-area * { visibility: visible; } .print-area { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; } .btn, .btn-row, .tabs, .header, .stats-row, .form-grid { display: none !important; } table th { background: #0d9488 !important; -webkit-print-color-adjust: exact; } }
+        @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="brand">🏫 School<span>Manager</span> — Payroll</div><a href="../dashboard.html">← Dashboard</a></div>
+    <div class="main">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('add')">➕ Add Salary</button>
+            <button class="tab" onclick="switchTab('list')">📋 Salary Records</button>
+        </div>
+
+        <!-- ADD SALARY -->
+        <div id="panel-add" class="panel active">
+            <div class="card"><h3>💵 Record Staff Salary</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Staff Name *</label><input type="text" id="staffName" placeholder="Full name"></div>
+                    <div class="form-group"><label>Role / Position</label><input type="text" id="staffRole" placeholder="e.g., Teacher, Cleaner"></div>
+                    <div class="form-group"><label>Monthly Salary (GHS) *</label><input type="number" id="salaryAmount" placeholder="0.00" step="0.01"></div>
+                    <button class="btn btn-success" onclick="addSalary()" style="height:42px;">➕ Add</button>
+                </div>
+                <div class="form-grid" style="margin-top:12px;">
+                    <div class="form-group"><label>Month</label><select id="salaryMonth"><option value="January">January</option><option value="February">February</option><option value="March">March</option><option value="April">April</option><option value="May" selected>May</option><option value="June">June</option><option value="July">July</option><option value="August">August</option><option value="September">September</option><option value="October">October</option><option value="November">November</option><option value="December">December</option></select></div>
+                    <div class="form-group"><label>Year</label><input type="number" id="salaryYear" value="2025"></div>
+                    <div class="form-group"><label>Payment Date</label><input type="date" id="paymentDate"></div>
+                    <div class="form-group"><label>Notes</label><input type="text" id="salaryNotes" placeholder="Optional"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SALARY RECORDS -->
+        <div id="panel-list" class="panel">
+            <div class="stats-row">
+                <div class="stat-card" style="border-left:4px solid var(--primary);"><div class="value" id="sTotalStaff">0</div><div class="label">Staff</div></div>
+                <div class="stat-card" style="border-left:4px solid var(--success);"><div class="value" id="sThisMonth">GHS 0</div><div class="label">This Month</div></div>
+                <div class="stat-card" style="border-left:4px solid var(--warning);"><div class="value" id="sTotalPaid">GHS 0</div><div class="label">Total Paid</div></div>
+            </div>
+            <div class="card print-area" id="printPayroll">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                    <h3 style="margin:0;">📋 Salary Records</h3>
+                    <div style="display:flex;gap:8px;">
+                        <select id="filterMonth" onchange="loadPayrollTable()" style="padding:8px;border:1px solid var(--border);border-radius:6px;">
+                            <option value="">All Months</option><option value="January">January</option><option value="February">February</option><option value="March">March</option><option value="April">April</option><option value="May">May</option><option value="June">June</option><option value="July">July</option><option value="August">August</option><option value="September">September</option><option value="October">October</option><option value="November">November</option><option value="December">December</option>
+                        </select>
+                        <button class="btn btn-print" onclick="printPayroll()">🖨️ Print Salary</button>
+                        <button class="btn btn-danger" style="padding:8px 14px;font-size:11px;" onclick="clearAllSalaries()">🗑 Clear All</button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;"><table><thead><tr><th>Staff</th><th>Role</th><th>Salary (GHS)</th><th>Month</th><th>Year</th><th>Paid Date</th><th>Notes</th><th>Action</th></tr></thead><tbody id="payrollTable"><tr><td colspan="8" style="text-align:center;color:#999;">Loading...</td></tr></tbody></table></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        function getPayroll() { var d=localStorage.getItem('sms_payroll'); return d?JSON.parse(d):[]; }
+        function savePayroll(data) { localStorage.setItem('sms_payroll', JSON.stringify(data)); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+            document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+            if(tab==='add'){document.querySelectorAll('.tab')[0].classList.add('active');document.getElementById('panel-add').classList.add('active');}
+            else {document.querySelectorAll('.tab')[1].classList.add('active');document.getElementById('panel-list').classList.add('active');loadPayrollTable();}
+        }
+
+        function addSalary() {
+            var name=document.getElementById('staffName').value.trim(), role=document.getElementById('staffRole').value.trim(), amt=parseFloat(document.getElementById('salaryAmount').value)||0;
+            if(!name||amt<=0){showToast('Enter staff name and salary amount!');return;}
+            var payroll=getPayroll();
+            payroll.push({
+                id:'SAL-'+Date.now(),staffName:name,role:role,amount:amt,
+                month:document.getElementById('salaryMonth').value,
+                year:document.getElementById('salaryYear').value,
+                paymentDate:document.getElementById('paymentDate').value||new Date().toLocaleDateString(),
+                notes:document.getElementById('salaryNotes').value.trim(),
+                status:'Paid',createdAt:new Date().toLocaleDateString()
+            });
+            savePayroll(payroll);
+            document.getElementById('staffName').value='';document.getElementById('staffRole').value='';document.getElementById('salaryAmount').value='';document.getElementById('salaryNotes').value='';
+            showToast('✅ Salary recorded! GHS '+amt.toFixed(2));
+        }
+
+        function loadPayrollTable() {
+            var payroll=getPayroll();payroll.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt);});
+            var filterMonth=document.getElementById('filterMonth').value;
+            if(filterMonth) payroll=payroll.filter(function(p){return p.month===filterMonth;});
+            
+            var uniqueStaff=new Set(payroll.map(function(p){return p.staffName;})).size;
+            var thisMonth=payroll.filter(function(p){return p.month===new Date().toLocaleDateString('en-US',{month:'long'});}).reduce(function(s,p){return s+(p.amount||0);},0);
+            var totalPaid=payroll.reduce(function(s,p){return s+(p.amount||0);},0);
+            document.getElementById('sTotalStaff').textContent=uniqueStaff;
+            document.getElementById('sThisMonth').textContent='GHS '+thisMonth.toLocaleString();
+            document.getElementById('sTotalPaid').textContent='GHS '+totalPaid.toLocaleString();
+            
+            var tbody=document.getElementById('payrollTable');
+            if(payroll.length===0){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#999;">No salary records</td></tr>';return;}
+            var html='';
+            payroll.forEach(function(p,i){
+                html+='<tr><td><strong>'+p.staffName+'</strong></td><td>'+(p.role||'-')+'</td><td>GHS '+(p.amount||0).toFixed(2)+'</td><td>'+p.month+'</td><td>'+p.year+'</td><td>'+(p.paymentDate||'-')+'</td><td>'+(p.notes||'-')+'</td><td><button class="btn btn-danger btn-sm" onclick="deleteSalary(\''+p.id+'\')">🗑</button></td></tr>';
+            });
+            tbody.innerHTML=html;
+        }
+
+        function deleteSalary(id) {
+            if(!confirm('Delete this salary record?'))return;
+            var payroll=getPayroll().filter(function(p){return p.id!==id;});
+            savePayroll(payroll);loadPayrollTable();showToast('Salary record deleted.');
+        }
+
+        function clearAllSalaries() {
+            if(!confirm('⚠️⚠️ DELETE ALL SALARY RECORDS?\n\nThis cannot be undone!'))return;
+            if(!confirm('FINAL: Clear all salary records?'))return;
+            savePayroll([]);loadPayrollTable();showToast('🗑 All salary records cleared!');
+        }
+
+        function printPayroll() { window.print(); }
+
+        function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
+        window.onload=function(){loadPayrollTable();};
+    </script>
+</body>
+</html>
